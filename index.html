@@ -1,11 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Weather</title>
-    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link href="style.css?a4160fbe6cb6cfe6c2c2" rel="stylesheet"></head>
+    <title>Emoticons recognition</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,500,700,400italic|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/vue-material.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/theme/default.css">
+    <style>
+        .emoji {
+            font-size: 60px;
+            line-height: 1;
+        }
+    </style>
+</head>
 <body>
-    <div class="main">Loading...</div>
-<script type="text/javascript" src="script.js?a4160fbe6cb6cfe6c2c2"></script></body>
+<div id="app">
+
+    <div class="page-container">
+        <md-app>
+            <md-app-toolbar class="md-primary">
+                <span class="md-title">Emotions recognition example</span>
+            </md-app-toolbar>
+
+            <md-app-content>
+                <div class="md-layout">
+                    <div class="md-layout-item">
+                        <div class="affdex_element"></div>
+                    </div>
+                    <div class="md-layout-item">
+                        (Initialization could take some time)<br/>
+                        Your emotion will be shown here:
+                        <div class="emoji"></div>
+                    </div>
+                </div>
+            </md-app-content>
+        </md-app>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/vue-material@beta"></script>
+<script src="https://download.affectiva.com/js/3.2/affdex.js"></script>
+<script>
+  Vue.use(VueMaterial.default);
+
+  var example = {
+    name: "Normal"
+  };
+
+  var app = new Vue(example);
+
+  app.$mount("#app");
+
+  var affdexRoot = document.querySelector('.affdex_element');
+  var emojiContainer = document.querySelector('.emoji');
+  var width = 640;
+  var height = 480;
+
+  var faceMode = affdex.FaceDetectorMode.LARGE_FACES;
+  var detector = new affdex.CameraDetector(affdexRoot, width, height, faceMode);
+
+  var lastTS = 0;
+  detector.addEventListener("onImageResultsSuccess", function (faces, image, timestamp) {
+    if (faces.length && timestamp - lastTS > 0.3) {
+      emojiContainer.textContent = faces[0].emojis.dominantEmoji;
+      lastTS = timestamp;
+    }
+  });
+
+  // Track smiles
+  detector.detectExpressions.smile = true;
+
+  // Track joy emotion
+  detector.detectEmotions.joy = true;
+
+  // Detect person's gender
+  detector.detectAppearance.gender = true;
+
+  detector.detectAllExpressions();
+  detector.detectAllEmotions();
+  detector.detectAllEmojis();
+  detector.detectAllAppearance();
+
+  detector.start();
+
+</script>
+</body>
 </html>
